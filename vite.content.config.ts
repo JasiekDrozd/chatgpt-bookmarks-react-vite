@@ -14,6 +14,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    emptyOutDir: false, // Don't empty the output directory to preserve popup.js
     lib: {
       entry: resolve(__dirname, 'src/contentScript.tsx'),
       name: 'ContentScript',

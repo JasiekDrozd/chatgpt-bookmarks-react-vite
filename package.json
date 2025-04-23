@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build:popup": "vite build --config vite.popup.config.ts",
-    "build:content": "vite build --config vite.content.config.ts",
+    "build:content": "vite build --config vite.content.config.ts --emptyOutDir false",
     "build:extension": "rm -rf dist && tsc && npm run build:popup && npm run build:content && node scripts/copy-extension-files.cjs",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"

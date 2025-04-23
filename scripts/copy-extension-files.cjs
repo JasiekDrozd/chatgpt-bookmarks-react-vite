@@ -35,6 +35,23 @@ function copyExtensionFiles() {
   const contentCssDest = path.join(__dirname, '../dist/content.css');
   fs.copyFileSync(contentCssSource, contentCssDest);
   
+  // Verify that popup.js and popup.css exist
+  const popupJsPath = path.join(__dirname, '../dist/popup.js');
+  const popupCssPath = path.join(__dirname, '../dist/popup.css');
+  
+  if (!fs.existsSync(popupJsPath)) {
+    console.error('ERROR: popup.js is missing! The build:popup task may not have completed successfully.');
+    console.log('Make sure to run npm run build:popup before this script.');
+  } else {
+    console.log('Verified popup.js exists in dist directory');
+  }
+  
+  if (!fs.existsSync(popupCssPath)) {
+    console.log('WARNING: popup.css is missing from dist directory.');
+  } else {
+    console.log('Verified popup.css exists in dist directory');
+  }
+  
   // Fix popup.js paths in index.html if needed
   const indexHtmlPath = path.join(__dirname, '../dist/index.html');
   const sourceIndexHtmlPath = path.join(__dirname, '../index.html');
