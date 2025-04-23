@@ -1,0 +1,241 @@
+/* CSS dla sidebara i komponentów wstrzykiwanych do ChatGPT */
+:root {
+  --cgpt-sidebar-bg: #ffffff;
+  --cgpt-sidebar-border: #e5e5e5;
+  --cgpt-sidebar-shadow: rgba(0,0,0,0.1);
+  --cgpt-sidebar-text: #333333;
+  --cgpt-sidebar-header-text: #111111;
+  --cgpt-sidebar-link: #007bff;
+  --cgpt-sidebar-folder-bg: #f9f9f9;
+  --cgpt-sidebar-folder-border: #dddddd;
+  --cgpt-sidebar-tab-bg: #eeeeee;
+  --cgpt-sidebar-tab-border: #cccccc;
+  --cgpt-sidebar-tab-icon: #555555;
+  --cgpt-button-create-bg: #4CAF50;
+  --cgpt-button-create-hover-bg: #45a049;
+  --cgpt-button-add-bg: #007bff;
+  --cgpt-button-delete-folder-bg: #dc3545;
+  --cgpt-button-delete-item-bg: #6c757d;
+  --cgpt-button-delete-item-hover-bg: #5a6268;
+}
+
+/* Sidebar container */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -320px; /* Start hidden */
+  width: 320px;
+  height: 100%;
+  background-color: var(--cgpt-sidebar-bg);
+  border-left: 1px solid var(--cgpt-sidebar-border);
+  box-shadow: -2px 0 5px var(--cgpt-sidebar-shadow);
+  z-index: 10000; /* Ensure high visibility */
+  transition: right 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 14px;
+  color: var(--cgpt-sidebar-text);
+}
+
+.sidebar.visible {
+  right: 0; /* Slide in */
+}
+
+.sidebar-tab {
+  position: absolute;
+  left: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 60px;
+  background-color: var(--cgpt-sidebar-tab-bg);
+  border: 1px solid var(--cgpt-sidebar-tab-border);
+  border-right: none;
+  border-radius: 5px 0 0 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -1px 1px 3px var(--cgpt-sidebar-shadow);
+}
+
+.sidebar-tab span {
+  font-size: 18px;
+  color: var(--cgpt-sidebar-tab-icon);
+}
+
+.sidebar-content {
+  padding: 15px;
+  overflow: auto;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  color: var(--cgpt-sidebar-header-text);
+  border-bottom: 1px solid var(--cgpt-sidebar-border);
+  padding-bottom: 10px;
+  font-size: 18px;
+}
+
+/* Folder */
+.folder {
+  margin-bottom: 15px;
+  background-color: var(--cgpt-sidebar-folder-bg);
+  border: 1px solid var(--cgpt-sidebar-folder-border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.folder-header {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--cgpt-sidebar-folder-border);
+  background-color: rgba(0,0,0,0.03);
+}
+
+.folder-header h2 {
+  margin: 0;
+  font-size: 16px;
+  padding: 0;
+  border: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.folder-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.folder ul {
+  padding: 10px;
+  margin: 0;
+  list-style-type: none;
+}
+
+/* Bookmark */
+.bookmark {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--cgpt-sidebar-border);
+}
+
+.bookmark:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.bookmark a {
+  color: var(--cgpt-sidebar-link);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.bookmark a:hover {
+  text-decoration: underline;
+}
+
+/* Buttons */
+.add-here-btn {
+  background-color: var(--cgpt-button-add-bg);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-folder-btn {
+  background-color: var(--cgpt-button-delete-folder-bg);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-btn {
+  background-color: var(--cgpt-button-delete-item-bg);
+  color: white;
+  border: none;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.delete-btn:hover {
+  background-color: var(--cgpt-button-delete-item-hover-bg);
+}
+
+/* Folder creation */
+.folder-creation {
+  margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.folder-creation input {
+  flex-grow: 1;
+  padding: 5px 10px;
+  border: 1px solid var(--cgpt-sidebar-border);
+  border-radius: 3px;
+}
+
+.folder-creation button {
+  background-color: var(--cgpt-button-create-bg);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.folder-creation button:hover {
+  background-color: var(--cgpt-button-create-hover-bg);
+}
+
+/* Toggle button in ChatGPT UI */
+.toggle-button {
+  background: transparent;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.toggle-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Loading and error states */
+.sidebar.loading, .sidebar.error {
+  padding: 20px;
+  text-align: center;
+}
+
+/* Animacja po dodaniu zakładki */
+.sidebar.bookmark-added {
+  background-color: rgba(0, 128, 0, 0.1) !important; /* Lekko zielone tło */
+  transition: background-color 0.3s ease-in-out;
+} 

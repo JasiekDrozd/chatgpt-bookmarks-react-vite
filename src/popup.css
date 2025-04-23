@@ -1,0 +1,106 @@
+/* Style dla popup rozszerzenia */
+body {
+  width: 400px;
+  max-height: 600px;
+  margin: 0;
+  padding: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 18px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.folder {
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.folder-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ddd;
+}
+
+.folder-header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.folder-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.folder ul {
+  margin: 0;
+  padding: 8px;
+  list-style: none;
+}
+
+.bookmark {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.bookmark:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.folder-creation {
+  display: flex;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.folder-creation input {
+  flex-grow: 1;
+  padding: 6px;
+}
+
+button {
+  cursor: pointer;
+}
+
+.add-here-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
+.delete-folder-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
+.delete-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.popup.loading, 
+.popup.error {
+  padding: 20px;
+  text-align: center;
+} 
