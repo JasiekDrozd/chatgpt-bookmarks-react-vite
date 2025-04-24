@@ -43,13 +43,15 @@ export const Folder: React.FC<FolderProps> = ({
       
       <ul>
         {folder.bookmarks && folder.bookmarks.length > 0 ? (
-          folder.bookmarks.map((bookmark, index) => (
-            <Bookmark
-              key={`${bookmark.url}-${index}`}
-              bookmark={bookmark}
-              onDelete={() => onDeleteBookmark(folder.id, index)}
-            />
-          ))
+          folder.bookmarks
+            .filter(bookmark => bookmark && bookmark.url)
+            .map((bookmark, index) => (
+              <Bookmark
+                key={`${bookmark.url}-${index}`}
+                bookmark={bookmark}
+                onDelete={() => onDeleteBookmark(folder.id, index)}
+              />
+            ))
         ) : (
           <li>No bookmarks in this folder.</li>
         )}

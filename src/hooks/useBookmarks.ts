@@ -68,13 +68,19 @@ export const useBookmarks = () => {
   // Add bookmark to a folder
   const addBookmarkToFolder = useCallback(async (folderId: string, bookmark: Bookmark) => {
     try {
+      // Validate bookmark data
+      if (!bookmark || !bookmark.url) {
+        console.error('Invalid bookmark data:', bookmark);
+        return false;
+      }
+
       const folderIndex = folders.findIndex(f => f.id === folderId);
       if (folderIndex === -1) {
         throw new Error('Folder not found');
       }
 
       // Check if bookmark already exists in this folder
-      const bookmarkExists = folders[folderIndex].bookmarks.some(b => b.url === bookmark.url);
+      const bookmarkExists = folders[folderIndex].bookmarks.some(b => b && b.url === bookmark.url);
       if (bookmarkExists) {
         return false;
       }
@@ -132,15 +138,22 @@ export const useBookmarks = () => {
       // Standard extension context
       try {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (!tabs || !tabs[0] || !tabs[0].url) {
-            console.error('No active tab found or missing URL');
+          if (!tabs || tabs.length === 0) {
+            console.error('No active tabs found');
+            resolve(null);
+            return;
+          }
+          
+          const tab = tabs[0];
+          if (!tab || !tab.url) {
+            console.error('Active tab is missing or has no URL');
             resolve(null);
             return;
           }
           
           resolve({
-            url: tabs[0].url,
-            title: tabs[0].title || 'Untitled'
+            url: tab.url,
+            title: tab.title || 'Untitled'
           });
         });
       } catch (err) {
