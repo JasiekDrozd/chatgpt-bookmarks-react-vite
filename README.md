@@ -1,15 +1,15 @@
-# ChatGPT Bookmarks (React)
+# ChatGPT Bookmarks (React) + Firebase 🔖
 
 A Chrome browser extension that allows you to save bookmarks for ChatGPT conversations. This version is rewritten in React with TypeScript.
 
-## Features
+## ✨ Features
 
-- Save bookmarks for ChatGPT conversations into folders
-- Sidebar panel with bookmarks available on the ChatGPT page
-- Synchronization of bookmarks via Firestore (with chrome.storage as a fallback)
-- Easy management of folders and bookmarks
+- 📚 Save bookmarks for ChatGPT conversations into folders
+- 💻 Sidebar panel with bookmarks available on the ChatGPT page
+- ☁️ Synchronization of bookmarks via Firestore (with `chrome.storage` as a fallback)
+- ⚙️ Easy management of folders and bookmarks
 
-## Technologies
+## 🛠️ Technologies
 
 - React 19
 - TypeScript
@@ -17,7 +17,7 @@ A Chrome browser extension that allows you to save bookmarks for ChatGPT convers
 - Chrome Extension API
 - Firebase Firestore
 
-## Development
+## 🚀 Development
 
 ### Requirements
 
@@ -44,7 +44,7 @@ npm run build:extension
 
 This command will build the extension and copy all necessary files to the `dist` directory.
 
-## Extension Installation
+## 📦 Extension Installation
 
 1. Build the extension using the `npm run build:extension` command
 2. Open Chrome and navigate to `chrome://extensions`
@@ -52,7 +52,7 @@ This command will build the extension and copy all necessary files to the `dist`
 4. Click "Load unpacked" and select the `dist` directory from the project
 5. The extension should appear in the list of installed extensions
 
-## Firebase Configuration (Optional - for cloud synchronization)
+## 🔥 Firebase Configuration (Optional - for cloud synchronization)
 
 This extension uses Firestore to store bookmarks and folders in the cloud, with local `chrome.storage` as a backup.
 
@@ -70,28 +70,28 @@ To configure the Firebase connection:
     rules_version = '2';
     service cloud.firestore {
       match /databases/{database}/documents {
-        // WARNING: Allows anyone to read/write. Use with caution.
+        // WARNING: Allows anyone to read/write. Use with caution. ⚠️
         match /{document=**} {
           allow read, write: if true;
         }
       }
     }
     ```
-    **Remember:** These rules are insecure for public applications.
+    **Remember:** These rules are insecure for public applications. 🚨
 6.  **Rebuild the extension:** After configuring `firebaseConfig.ts`, rebuild the extension:
     ```bash
     npm run build:extension
     ```
 
-The `src/firebaseConfig.ts` file is automatically ignored by Git (thanks to the `.gitignore` entry), so your API keys won't be accidentally committed to the repository.
+The `src/firebaseConfig.ts` file is automatically ignored by Git (thanks to the `.gitignore` entry), so your API keys won't be accidentally committed to the repository. 🔒
 
-## Usage
+## 🖱️ Usage
 
 - Open ChatGPT (https://chat.openai.com/)
-- A new button with a star icon will appear in the ChatGPT left sidebar
+- A new button with a star icon (⭐) will appear in the ChatGPT left sidebar
 - Click the star to open the bookmarks sidebar panel
 - You can create folders and add bookmarks to them
 
-## License
+## 📜 License
 
 MIT
