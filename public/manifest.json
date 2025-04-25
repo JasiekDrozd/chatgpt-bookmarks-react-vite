@@ -9,7 +9,6 @@
     "scripting"
   ],
   "action": {
-    "default_popup": "index.html",
     "default_icon": {
       "16": "icons/bookmark-16.png",
       "48": "icons/bookmark-48.png",

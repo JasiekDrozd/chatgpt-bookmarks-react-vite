@@ -1,129 +1,215 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Bookmark, Folder } from '../types';
-import { getStorageData, setStorageData, generateId, migrateData } from '../utils/storage';
+// Import Firestore service
+import * as firestoreService from '../services/firestoreService';
+// Keep local storage utils for backup/fallback
+import { getStorageData, setStorageData, generateId } from '../utils/storage';
+
+// Helper to get data from local storage (simple wrapper)
+const getLocalBackup = async (): Promise<Folder[]> => {
+  try {
+    return await getStorageData(); // Assumes getStorageData returns Folder[]
+  } catch (err) {
+    console.error('Error reading local backup:', err);
+    return []; // Return empty array on error
+  }
+};
+
+// Helper to update local storage backup
+const updateLocalBackup = async (folders: Folder[]) => {
+  try {
+    await setStorageData(folders);
+  } catch (err) {
+    console.error('Error updating local backup:', err);
+    // Decide if we should notify the user about backup failure
+  }
+};
 
 export const useBookmarks = () => {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState<boolean>(false); // Track if we are using offline data
 
-  // Initialize bookmarks data
+  // Load initial data: Firestore first, then local backup
   const initializeBookmarks = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setIsOffline(false);
     try {
-      setLoading(true);
-      const data = await migrateData();
-      setFolders(data);
-      setError(null);
-    } catch (err) {
-      console.error('Error initializing bookmarks:', err);
-      setError('Failed to load bookmarks');
+      console.log('Attempting to load bookmarks from Firestore...');
+      const firestoreFolders = await firestoreService.getFoldersAndBookmarks();
+      setFolders(firestoreFolders);
+      await updateLocalBackup(firestoreFolders); // Update backup on successful fetch
+      console.log('Successfully loaded bookmarks from Firestore.');
+    } catch (firestoreError) {
+      console.warn('Firestore load failed, attempting local backup:', firestoreError);
+      setError('Could not connect to cloud storage. Using local backup.');
+      setIsOffline(true);
+      const localFolders = await getLocalBackup();
+      setFolders(localFolders);
+      if (localFolders.length === 0) {
+        console.log('Local backup is empty or unavailable.');
+        // Optionally set a more specific error if local backup is also empty
+      } else {
+        console.log('Loaded bookmarks from local backup.');
+      }
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Load bookmarks on component mount
   useEffect(() => {
     initializeBookmarks();
   }, [initializeBookmarks]);
 
-  // Create a new folder
-  const createFolder = useCallback(async (name: string) => {
-    if (!name.trim()) {
-      return false;
-    }
+  // --- CRUD Operations --- 
+
+  const createFolder = useCallback(async (name: string): Promise<boolean> => {
+    if (!name.trim()) return false;
+
+    // Optimistic UI update
+    const tempId = generateId(); // Use temp ID for optimistic update
+    const newFolderOptimistic: Folder = {
+      id: tempId, 
+      name: name.trim(),
+      bookmarks: []
+    };
+    const originalFolders = folders;
+    setFolders(prevFolders => [...prevFolders, newFolderOptimistic]);
+    setError(null); // Clear previous errors
 
     try {
-      const newFolder: Folder = {
-        id: generateId(),
-        name: name.trim(),
-        bookmarks: []
-      };
-
-      const updatedFolders = [...folders, newFolder];
-      await setStorageData(updatedFolders);
-      setFolders(updatedFolders);
+      const newFolderId = await firestoreService.createFolder(name.trim());
+      // Replace optimistic folder with real one from Firestore (or refetch)
+      setFolders(prevFolders => 
+        prevFolders.map(f => f.id === tempId ? { ...newFolderOptimistic, id: newFolderId } : f)
+      );
+      await updateLocalBackup(folders); // Update backup on success
       return true;
     } catch (err) {
-      console.error('Error creating folder:', err);
-      setError('Failed to create folder');
+      console.error('Firestore Error - createFolder:', err);
+      setError('Failed to create folder in cloud storage.');
+      setFolders(originalFolders); // Revert optimistic update
       return false;
     }
   }, [folders]);
 
-  // Delete a folder
-  const deleteFolder = useCallback(async (folderId: string) => {
+  const deleteFolder = useCallback(async (folderId: string): Promise<boolean> => {
+    // Optimistic UI update
+    const originalFolders = folders;
+    setFolders(prevFolders => prevFolders.filter(folder => folder.id !== folderId));
+    setError(null); // Clear previous errors
+
     try {
-      const updatedFolders = folders.filter(folder => folder.id !== folderId);
-      await setStorageData(updatedFolders);
-      setFolders(updatedFolders);
+      await firestoreService.deleteFolder(folderId);
+      await updateLocalBackup(folders.filter(folder => folder.id !== folderId)); // Update backup on success
       return true;
     } catch (err) {
-      console.error('Error deleting folder:', err);
-      setError('Failed to delete folder');
+      console.error('Firestore Error - deleteFolder:', err);
+      setError('Failed to delete folder in cloud storage.');
+      setFolders(originalFolders); // Revert optimistic update
       return false;
     }
   }, [folders]);
 
-  // Add bookmark to a folder
-  const addBookmarkToFolder = useCallback(async (folderId: string, bookmark: Bookmark) => {
-    try {
-      // Validate bookmark data
-      if (!bookmark || !bookmark.url) {
-        console.error('Invalid bookmark data:', bookmark);
+  const addBookmarkToFolder = useCallback(async (folderId: string, bookmark: Bookmark): Promise<boolean> => {
+    if (!bookmark || !bookmark.url) {
+      console.error('Invalid bookmark data:', bookmark);
+      return false;
+    }
+    
+    // Find folder for optimistic update
+    const folderIndex = folders.findIndex(f => f.id === folderId);
+    if (folderIndex === -1) {
+        setError('Folder not found for adding bookmark.');
         return false;
-      }
+    }
 
-      const folderIndex = folders.findIndex(f => f.id === folderId);
-      if (folderIndex === -1) {
-        throw new Error('Folder not found');
-      }
+    // Check if bookmark already exists in this folder (client-side check)
+    const bookmarkExists = folders[folderIndex].bookmarks.some(b => b && b.url === bookmark.url);
+    if (bookmarkExists) {
+      setError('Bookmark already exists in this folder.'); 
+      return false; // Or show a less intrusive notification
+    }
 
-      // Check if bookmark already exists in this folder
-      const bookmarkExists = folders[folderIndex].bookmarks.some(b => b && b.url === bookmark.url);
-      if (bookmarkExists) {
-        return false;
+    // Optimistic UI update
+    const tempBookmark = { ...bookmark, id: generateId() }; // Add temporary ID
+    const originalFolders = folders;
+    const updatedFoldersOptimistic = folders.map(f => {
+      if (f.id === folderId) {
+        return { ...f, bookmarks: [...f.bookmarks, tempBookmark] };
       }
+      return f;
+    });
+    setFolders(updatedFoldersOptimistic);
+    setError(null);
 
-      const updatedFolders = [...folders];
-      updatedFolders[folderIndex].bookmarks.push(bookmark);
-      await setStorageData(updatedFolders);
-      setFolders(updatedFolders);
+    try {
+      // Omit the temp ID when sending to Firestore
+      const { id, ...bookmarkData } = tempBookmark; 
+      const newBookmarkId = await firestoreService.addBookmarkToFolder(folderId, bookmarkData);
+      
+      // Update the bookmark with the real ID
+      setFolders(prevFolders => 
+        prevFolders.map(f => {
+          if (f.id === folderId) {
+            return {
+              ...f,
+              bookmarks: f.bookmarks.map(b => b.id === tempBookmark.id ? { ...b, id: newBookmarkId } : b)
+            };
+          }
+          return f;
+        })
+      );
+      await updateLocalBackup(folders); // Update backup
       return true;
     } catch (err) {
-      console.error('Error adding bookmark:', err);
-      setError('Failed to add bookmark');
+      console.error('Firestore Error - addBookmarkToFolder:', err);
+      setError('Failed to add bookmark to cloud storage.');
+      setFolders(originalFolders); // Revert optimistic update
       return false;
     }
   }, [folders]);
 
-  // Delete bookmark from a folder
-  const deleteBookmark = useCallback(async (folderId: string, bookmarkIndex: number) => {
-    try {
-      const folderIndex = folders.findIndex(f => f.id === folderId);
-      if (folderIndex === -1) {
-        throw new Error('Folder not found');
-      }
+  const deleteBookmark = useCallback(async (folderId: string, bookmarkId: string): Promise<boolean> => {
+     // Find folder and bookmark index for optimistic update
+    const folderIndex = folders.findIndex(f => f.id === folderId);
+    if (folderIndex === -1) return false;
+    const bookmarkIndex = folders[folderIndex].bookmarks.findIndex(b => b.id === bookmarkId);
+    if (bookmarkIndex === -1) return false;
 
-      const updatedFolders = [...folders];
-      updatedFolders[folderIndex].bookmarks.splice(bookmarkIndex, 1);
-      await setStorageData(updatedFolders);
-      setFolders(updatedFolders);
+    // Optimistic UI update
+    const originalFolders = folders;
+    const updatedFoldersOptimistic = folders.map(f => {
+      if (f.id === folderId) {
+        return { ...f, bookmarks: f.bookmarks.filter(b => b.id !== bookmarkId) };
+      }
+      return f;
+    });
+    setFolders(updatedFoldersOptimistic);
+    setError(null);
+    
+    try {
+      await firestoreService.deleteBookmark(folderId, bookmarkId);
+      await updateLocalBackup(folders.filter(f => f.id === folderId ? { ...f, bookmarks: f.bookmarks.filter(b => b.id !== bookmarkId) } : f)); // Update backup
       return true;
     } catch (err) {
-      console.error('Error deleting bookmark:', err);
-      setError('Failed to delete bookmark');
+      console.error('Firestore Error - deleteBookmark:', err);
+      setError('Failed to delete bookmark from cloud storage.');
+      setFolders(originalFolders); // Revert optimistic update
       return false;
     }
   }, [folders]);
 
   // Get current tab info for bookmarking
-  const getCurrentTabInfo = useCallback(async (): Promise<Bookmark | null> => {
+  const getCurrentTabInfo = useCallback(async (): Promise<Omit<Bookmark, 'id'> | null> => {
     return new Promise((resolve) => {
       // Check if we're in content script context (chrome.tabs might not be available)
       if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.tabs.query) {
         // In content script, try to get current URL/title from document
         if (document && document.location && document.title) {
+          // Resolve with object matching Omit<Bookmark, 'id'>
           resolve({
             url: document.location.href,
             title: document.title || 'Untitled'
@@ -151,6 +237,7 @@ export const useBookmarks = () => {
             return;
           }
           
+          // Resolve with object matching Omit<Bookmark, 'id'>
           resolve({
             url: tab.url,
             title: tab.title || 'Untitled'
@@ -167,11 +254,12 @@ export const useBookmarks = () => {
     folders,
     loading,
     error,
+    isOffline, // Expose offline status
     createFolder,
     deleteFolder,
     addBookmarkToFolder,
     deleteBookmark,
     getCurrentTabInfo,
-    refreshBookmarks: initializeBookmarks
+    refreshBookmarks: initializeBookmarks // Function to manually trigger refresh
   };
 }; 

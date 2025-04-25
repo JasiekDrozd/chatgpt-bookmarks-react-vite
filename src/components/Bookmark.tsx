@@ -1,5 +1,7 @@
 import React from 'react';
 import { Bookmark as BookmarkType } from '../types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 
 interface BookmarkProps {
   bookmark: BookmarkType;
@@ -27,10 +29,14 @@ export const Bookmark: React.FC<BookmarkProps> = ({ bookmark, onDelete }) => {
         className="delete-btn" 
         onClick={(e) => {
           e.preventDefault();
-          onDelete();
+          // Add confirmation dialog
+          if (window.confirm('Are you sure you want to delete this bookmark?')) {
+            onDelete();
+          }
         }}
+        title="Delete Bookmark"
       >
-        Delete
+        <FontAwesomeIcon icon={faTimes} />
       </button>
     </li>
   );

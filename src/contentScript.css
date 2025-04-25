@@ -1,21 +1,21 @@
 /* CSS dla sidebara i komponentów wstrzykiwanych do ChatGPT */
 :root {
-  --cgpt-sidebar-bg: #ffffff;
-  --cgpt-sidebar-border: #e5e5e5;
-  --cgpt-sidebar-shadow: rgba(0,0,0,0.1);
-  --cgpt-sidebar-text: #333333;
-  --cgpt-sidebar-header-text: #111111;
-  --cgpt-sidebar-link: #007bff;
-  --cgpt-sidebar-folder-bg: #f9f9f9;
-  --cgpt-sidebar-folder-border: #dddddd;
-  --cgpt-sidebar-tab-bg: #eeeeee;
-  --cgpt-sidebar-tab-border: #cccccc;
-  --cgpt-sidebar-tab-icon: #555555;
-  --cgpt-button-create-bg: #4CAF50;
-  --cgpt-button-create-hover-bg: #45a049;
-  --cgpt-button-add-bg: #007bff;
-  --cgpt-button-delete-folder-bg: #dc3545;
-  --cgpt-button-delete-item-bg: #6c757d;
+  --cgpt-sidebar-bg: #F2F2F2; /* White Smoke */
+  --cgpt-sidebar-border: #E4E4E4; /* Titanium White */
+  --cgpt-sidebar-shadow: rgba(65, 83, 128, 0.1); /* Shadow based on Deep Azure */
+  --cgpt-sidebar-text: #415380; /* Deep Azure */
+  --cgpt-sidebar-header-text: #415380; /* Deep Azure */
+  --cgpt-sidebar-link: #415380; /* Deep Azure */
+  --cgpt-sidebar-folder-bg: #FFFFFF; /* Slightly lighter than sidebar for contrast? Or keep F2F2F2? Let's try white */
+  --cgpt-sidebar-folder-border: #E4E4E4; /* Titanium White */
+  --cgpt-sidebar-tab-bg: #E4E4E4; /* Titanium White */
+  --cgpt-sidebar-tab-border: #cccccc; /* Keeping for now */
+  --cgpt-sidebar-tab-icon: #415380; /* Deep Azure */
+  --cgpt-button-create-bg: #415380; /* Deep Azure */
+  --cgpt-button-create-hover-bg: #AEE5D1; /* Coral Green */
+  --cgpt-button-add-bg: #415380; /* Deep Azure */
+  --cgpt-button-delete-folder-bg: #dc3545; /* Keeping red for delete */
+  --cgpt-button-delete-item-bg: #6c757d; /* Keeping grey for delete */
   --cgpt-button-delete-item-hover-bg: #5a6268;
 }
 

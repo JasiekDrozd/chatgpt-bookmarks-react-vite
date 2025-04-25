@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Firebase Configuration - DO NOT COMMIT
+src/firebaseConfig.ts

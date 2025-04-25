@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Folder as FolderType } from '../types';
 import { Folder } from './Folder';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFolderPlus } from '@fortawesome/free-solid-svg-icons';
 
 interface FolderListProps {
   folders: FolderType[];
   onDeleteFolder: (folderId: string) => void;
   onAddBookmark: (folderId: string) => void;
-  onDeleteBookmark: (folderId: string, bookmarkIndex: number) => void;
+  onDeleteBookmark: (folderId: string, bookmarkId: string) => void;
   onCreateFolder: (name: string) => void;
 }
 
@@ -35,7 +37,9 @@ export const FolderList: React.FC<FolderListProps> = ({
           onChange={(e) => setNewFolderName(e.target.value)}
           placeholder="New folder name"
         />
-        <button onClick={handleCreateFolder}>Create Folder</button>
+        <button onClick={handleCreateFolder} title="Create Folder">
+          <FontAwesomeIcon icon={faFolderPlus} />
+        </button>
       </div>
 
       <div className="folders-container">

@@ -1,12 +1,14 @@
 import React from 'react';
 import { Folder as FolderType } from '../types';
 import { Bookmark } from './Bookmark';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 interface FolderProps {
   folder: FolderType;
   onDeleteFolder: (folderId: string) => void;
   onAddBookmark: (folderId: string) => void;
-  onDeleteBookmark: (folderId: string, bookmarkIndex: number) => void;
+  onDeleteBookmark: (folderId: string, bookmarkId: string) => void;
 }
 
 export const Folder: React.FC<FolderProps> = ({
@@ -29,14 +31,16 @@ export const Folder: React.FC<FolderProps> = ({
           <button 
             className="add-here-btn"
             onClick={() => onAddBookmark(folder.id)}
+            title="Add bookmark here"
           >
-            Add Here
+            <FontAwesomeIcon icon={faPlus} />
           </button>
           <button 
             className="delete-folder-btn"
             onClick={handleDeleteFolder}
+            title="Delete Folder"
           >
-            Delete Folder
+            <FontAwesomeIcon icon={faTrashAlt} />
           </button>
         </div>
       </div>
@@ -49,7 +53,7 @@ export const Folder: React.FC<FolderProps> = ({
               <Bookmark
                 key={`${bookmark.url}-${index}`}
                 bookmark={bookmark}
-                onDelete={() => onDeleteBookmark(folder.id, index)}
+                onDelete={() => onDeleteBookmark(folder.id, bookmark.id)}
               />
             ))
         ) : (
